@@ -26,9 +26,9 @@ public class MainActivity extends AppCompatActivity {
     Button buttonClear;
     Button buttonEquals;
 
-    Integer num1;
-    Integer num2;
-    String operator;
+    Integer num1 = 0;;
+    Integer num2 = 0;
+    String operator = null;
 
 
     @Override
@@ -170,29 +170,35 @@ public class MainActivity extends AppCompatActivity {
 
     void handleButtonClicked(String pressedKey, boolean clearText) {
         String priorText = expressionField.getText().toString();
-        if(clearText) {
-            priorText = "";
+        if(pressedKey == "+" || pressedKey == "-" || pressedKey == "/" || pressedKey == "*") {
+            String newText = priorText + pressedKey;
+            expressionField.setText(newText);
+        } else {
+            if (clearText) {
+                priorText = "";
+            }
+            String newText = priorText + pressedKey;
+            expressionField.setText(newText);
         }
-        String newText = priorText + pressedKey;
-        expressionField.setText(newText);
     }
 
     void handleNumberButtonClicked(int number) {
-        if(num1 != null && num2 != null) {
-            handleButtonClicked(Integer.toString(number), true);
-        } else if(num1 == null) {
+        if(String.valueOf(num1).length() < 6 && operator == null) {
+            num1 *= 10;
+            num1 += number;
             handleButtonClicked(Integer.toString(number), false);
-            num1 = number;
-        } else if(num2 == null) {
+
+        } else if(String.valueOf(num2).length() < 6 && operator != null) {
+            num2 *= 10;
+            num2 += number;
             handleButtonClicked(Integer.toString(number), false);
-            num2 = number;
         }
     }
 
     void handleClearButtonClicked() {
         expressionField.setText("");
-        num1 = null;
-        num2 = null;
+        num1 = 0;
+        num2 = 0;
     }
 
     void handleOperatorButtonClicked(String operator) {
@@ -223,6 +229,7 @@ public class MainActivity extends AppCompatActivity {
         expressionField.setText(String.valueOf(result));
         num1 = null;
         num2 = null;
+        operator = null;
     }
 }
 
