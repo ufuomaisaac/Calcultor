@@ -26,9 +26,13 @@ public class MainActivity extends AppCompatActivity {
     Button buttonClear;
     Button buttonEquals;
 
-    Integer num1 = 0;;
+    Integer num1 = 0;
     Integer num2 = 0;
     String operator = null;
+    Integer result = null;
+    int operatorCounter = 0;
+    boolean negateNum2 = false;
+
 
 
     @Override
@@ -168,68 +172,113 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    void handleButtonClicked(String pressedKey, boolean clearText) {
+    void handleButtonClicked(String pressedKey) {
         String priorText = expressionField.getText().toString();
         if(pressedKey == "+" || pressedKey == "-" || pressedKey == "/" || pressedKey == "*") {
             String newText = priorText + pressedKey;
             expressionField.setText(newText);
         } else {
-            if (clearText) {
-                priorText = "";
-            }
             String newText = priorText + pressedKey;
             expressionField.setText(newText);
         }
     }
 
     void handleNumberButtonClicked(int number) {
-        if(String.valueOf(num1).length() < 6 && operator == null) {
-            num1 *= 10;
-            num1 += number;
-            handleButtonClicked(Integer.toString(number), false);
-
-        } else if(String.valueOf(num2).length() < 6 && operator != null) {
-            num2 *= 10;
-            num2 += number;
-            handleButtonClicked(Integer.toString(number), false);
-        }
+            if (operator == null) {
+                if (num1 == null) {
+                    num1 = number;
+                    handleButtonClicked(Integer.toString(number));
+                } else if (String.valueOf(num1).length() < 6) {
+                    String firstNumber = String.valueOf(num1).concat(String.valueOf(number));
+                    num1 = Integer.valueOf(firstNumber);
+                    handleButtonClicked(Integer.toString(number));
+                }
+            }else if (operator != null) {
+                    if (num2 == null) {
+                    num2 = number;
+                    handleButtonClicked(Integer.toString(number));
+                } else if (String.valueOf(number).length() < 6){
+                    String secondNumber = String.valueOf(num2).concat(String.valueOf(number));
+                    num2 = Integer.valueOf(secondNumber);
+                    handleButtonClicked(Integer.toString(number));
+                }
+            }
     }
 
     void handleClearButtonClicked() {
         expressionField.setText("");
-        num1 = 0;
-        num2 = 0;
-    }
-
-    void handleOperatorButtonClicked(String operator) {
-        handleButtonClicked(operator, false);
-        this.operator = operator;
-    }
-
-    void handleEqualsButtonClicked() {
-        int result = 0;
-
-        switch(operator) {
-            case "+":
-                result = num1 + num2;
-                break;
-
-            case "-":
-                result = num1 - num2;
-                break;
-
-            case "*":
-                result = num1 * num2;
-                break;
-
-            case "/":
-                result = (num2 == 0)? - 1: num1 / num2;
-        }
-
-        expressionField.setText(String.valueOf(result));
         num1 = null;
         num2 = null;
         operator = null;
+        result = null;
+        operatorCounter = 0;
+
+    }
+
+    void handleOperatorButtonClicked(String operator) {
+        handleButtonClicked(operator);
+        int prevoiusChar = expressionField.getText().toString().length() - 2;
+        String str = expressionField.getText().toString();
+        if (operatorCounter == 0) {
+            this.operator = operator;
+            operatorCounter++;
+        } else if (String.valueOf(str.charAt(prevoiusChar)) == "/" || String.valueOf(str.charAt(prevoiusChar)) == "*") {
+            if (String.valueOf(str.charAt(prevoiusChar)) == "*") {
+                if (operator == "+") {
+                    negateNum2 = false;
+                } else if(operator == "-") {
+                    negateNum2 = true;
+                }  else if(operator == "*" || operator == "||") {
+                    operatorCounter++;
+                }
+            } else if (String.valueOf(str.charAt(prevoiusChar)) == "/") {
+                if (operator == "+") {
+                    negateNum2 = false;
+                } else if (operator == "-") {
+                    negateNum2 = true;
+                } else if(operator == "*" || operator == "||") {
+                    operatorCounter++;
+                }
+            }
+        } else
+            operatorCounter++;
+
+    }
+
+    void handleEqualsButtonClicked() {
+        if (negateNum2) {
+            num2 = num2 * -1;
+        }
+        if (operator == null) {
+            result = num1;
+            expressionField.setText(String.valueOf(result));
+        } else if(operatorCounter >= 2) {
+            expressionField.setText("Syntax error");
+        } else
+         {
+            switch(operator) {
+                case "+":
+                    result = num1 + num2;
+                    break;
+
+                case "-":
+                    result = num1 - num2;
+                    break;
+
+                case "*":
+                    result = num1 * num2;
+                    break;
+
+                case "/":
+                    result = (num2 == 0)? - 1: num1 / num2;
+            }
+             expressionField.setText(String.valueOf(result));
+        }
+
+        num2 = null;
+        operator = null;
+        operatorCounter = 0;
+
     }
 }
 
