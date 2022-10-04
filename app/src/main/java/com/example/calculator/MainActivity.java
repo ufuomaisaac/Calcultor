@@ -1,8 +1,11 @@
 package com.example.calculator;
 
+import static android.util.Log.*;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 import android.view.View;
 import android.widget.Button;
@@ -26,12 +29,13 @@ public class MainActivity extends AppCompatActivity {
     Button buttonClear;
     Button buttonEquals;
 
-    Integer num1 = 0;
-    Integer num2 = 0;
+    Integer num1 = null;
+    Integer num2 = null;
     String operator = null;
-    Integer result = null;
+    int result = 0;
     int operatorCounter = 0;
     boolean negateNum2 = false;
+    boolean negateNum1 = false;
 
 
 
@@ -174,16 +178,14 @@ public class MainActivity extends AppCompatActivity {
 
     void handleButtonClicked(String pressedKey) {
         String priorText = expressionField.getText().toString();
-        if(pressedKey == "+" || pressedKey == "-" || pressedKey == "/" || pressedKey == "*") {
             String newText = priorText + pressedKey;
             expressionField.setText(newText);
-        } else {
-            String newText = priorText + pressedKey;
-            expressionField.setText(newText);
-        }
     }
 
     void handleNumberButtonClicked(int number) {
+        if(result != 0 && num1.equals(result)) {
+            handleClearButtonClicked();
+        }
             if (operator == null) {
                 if (num1 == null) {
                     num1 = number;
@@ -210,42 +212,55 @@ public class MainActivity extends AppCompatActivity {
         num1 = null;
         num2 = null;
         operator = null;
-        result = null;
+        result = 0;
         operatorCounter = 0;
+        negateNum1 = false;
+        negateNum2 = false;
 
     }
 
     void handleOperatorButtonClicked(String operator) {
         handleButtonClicked(operator);
-        int prevoiusChar = expressionField.getText().toString().length() - 2;
-        String str = expressionField.getText().toString();
-        if (operatorCounter == 0) {
-            this.operator = operator;
-            operatorCounter++;
-        } else if (String.valueOf(str.charAt(prevoiusChar)) == "/" || String.valueOf(str.charAt(prevoiusChar)) == "*") {
-            if (String.valueOf(str.charAt(prevoiusChar)) == "*") {
-                if (operator == "+") {
-                    negateNum2 = false;
-                } else if(operator == "-") {
-                    negateNum2 = true;
-                }  else if(operator == "*" || operator == "||") {
-                    operatorCounter++;
-                }
-            } else if (String.valueOf(str.charAt(prevoiusChar)) == "/") {
-                if (operator == "+") {
-                    negateNum2 = false;
-                } else if (operator == "-") {
-                    negateNum2 = true;
-                } else if(operator == "*" || operator == "||") {
-                    operatorCounter++;
-                }
-            }
-        } else
-            operatorCounter++;
+        Log.d("correct", "it is working");
+        if (num1 == null) {
+            Log.d("correct", "it is working");
+            if(operator.equals("-")) {
+                negateNum1 = true;
+            } else if (num1.equals("+")) {
+                negateNum1 = false;
+            } else
+                operatorCounter = operatorCounter + 2;
+        } else {
+            int prevoiusChar = expressionField.getText().toString().length() - 2;
+            String str = expressionField.getText().toString();
+            if (operatorCounter == 0) {
+                this.operator = operator;
+                operatorCounter++;
+            } else if (String.valueOf(str.charAt(prevoiusChar)).equals("*")) {
 
+                if (operator.equals("+"))
+                    negateNum2 = false;
+                else if (operator.equals("-"))
+                    negateNum2 = true;
+                else if (operator.equals("*") || operator.equals("/"))
+                    operatorCounter++;
+
+            } else if (String.valueOf(str.charAt(prevoiusChar)).equals("/")) {
+                if (operator.equals("+"))
+                    negateNum2 = false;
+                else if (operator.equals("-"))
+                    negateNum2 = true;
+                else if (operator.equals("*") || operator.equals("/"))
+                    operatorCounter++;
+            } else
+                operatorCounter++;
+        }
     }
 
     void handleEqualsButtonClicked() {
+        if (negateNum1) {
+            num1 = num1 * -1;
+        }
         if (negateNum2) {
             num2 = num2 * -1;
         }
@@ -275,9 +290,13 @@ public class MainActivity extends AppCompatActivity {
              expressionField.setText(String.valueOf(result));
         }
 
+
+        num1 = result;
         num2 = null;
         operator = null;
         operatorCounter = 0;
+        negateNum2 = false;
+        negateNum1 = false;
 
     }
 }
